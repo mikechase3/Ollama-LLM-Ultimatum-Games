@@ -1,0 +1,14 @@
+.gitignore
+.vscode/
+.idea/
+pycache/
+
+ollama-data/
+webui-data/
+
+packages/
+
+*.tar
+*.tar.gz
+
+.env

@@ -1,1 +1,28 @@
+.vscode/
+.idea/
 idea/*
+
+pycache/
+*.pyc
+
+# Ignore the large data volumes for Ollama and WebUI
+ollama-data/
+webui-data/
+
+# Ignore python packages we pre-downloaded for air-gapped installl
+packages/
+
+# Ignore saved Docker image tarballs
+*.tar
+*.tar.gz
+
+# Ignore environment files
+.env
+
+# Ignore any output data from experiments
+/data/results/
+*.csv
+*.xlsx
+# Exceptions for input data
+!data/input_trials.csv
+!data/input_trials.xlsx

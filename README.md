@@ -34,3 +34,5 @@ A streamlit web app provides a friendly interface to visualize results & manage 
 
 ## Development Guide
 I want to define the pipeline here later so I remember what & how I did it.
+
+* For Air-Gapped Networks, run `pip download -r requirements.txt -d ./packages` on the online computer's terminal
