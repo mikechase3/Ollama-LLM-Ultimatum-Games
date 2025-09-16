@@ -14,7 +14,7 @@ services:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
     volumes:
-      - ./webui-data/app/backend/data
+      - ./webui-data:/app/backend/data
     ports:
       - "3000:8080"
     environment:
@@ -26,11 +26,13 @@ services:
   # Service 3: my python app & experiment runner & streamlit thing
   python-dev:
     build: .
+    container_name: python-dev
     volumes:
       - ./:/app
     ports:
       - "8501:8501"
-    command: streamlit run src/app.py --server .runOnSave=true
+    command: streamlit run src/app.py --server.runOnSave=true
+#    command: sleep infinity
     depends_on:
       - ollama
     restart: unless-stopped
