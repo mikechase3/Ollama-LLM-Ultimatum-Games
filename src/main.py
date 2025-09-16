@@ -7,11 +7,11 @@ This script orchestrates the entire process:
 3. Loads the data.
 4. Builds the prompts.
 5. Runs the Ollama trials.
-6. Saves the results.
+6. Save the results.
 """
 
 from pathlib import Path
-from src import core
+from src import engine
 
 # --- 1. Define Constants and File Paths ---
 # Use pathlib to handle paths robustly. This makes the script work
@@ -30,23 +30,23 @@ def main():
     # Step 1: Generate a sample input file if one doesn't exist
     if not INPUT_FILE_PATH.exists():
         print(f"Input file not found. Generating sample at '{INPUT_FILE_PATH}'")
-        core.generate_sample_input_file(INPUT_FILE_PATH)
+        engine.generate_sample_input_file(INPUT_FILE_PATH)
 
     # Step 2: Load the input data
     print(f"\nLoading data from: {INPUT_FILE_PATH}")
-    input_df = core.load_input_data(INPUT_FILE_PATH)
+    input_df = engine.load_input_data(INPUT_FILE_PATH)
 
     # Step 3: Build prompts for each trial
     print("\nBuilding prompts...")
-    trials_with_prompts_df = core.build_prompts_df(input_df)
+    trials_with_prompts_df = engine.build_prompts_df(input_df)
 
     # Step 4: Run the trials against the Ollama API
     print("\nRunning Ollama trials...")
-    results_df = core.run_ollama_trials(trials_with_prompts_df)
+    results_df = engine.run_ollama_trials(trials_with_prompts_df)
 
     # Step 5: Save the final results
     print(f"\nSaving results to: {OUTPUT_FILE_PATH}")
-    core.save_results(results_df, OUTPUT_FILE_PATH)
+    engine.save_results(results_df, OUTPUT_FILE_PATH)
 
     print("\n--- Pipeline Finished ---")
 

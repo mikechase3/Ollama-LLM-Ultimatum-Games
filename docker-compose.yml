@@ -30,8 +30,10 @@ services:
     volumes:
       - ./:/app
     ports:
-      - "8501:8501"
-    command: streamlit run src/app.py --server.runOnSave=true
+      - "8501:8501"  # Map Streamlit App
+      - "2222:22"  # Map host port 2222 to container's SSH port on 22
+    command: sh -c "service ssh start && streamlit run src/dashboard.py"
+#    command: streamlit run src/dashboard.py --server.runOnSave=true
 #    command: sleep infinity
     depends_on:
       - ollama

@@ -1,6 +1,10 @@
+# IDE Settings
 .vscode/
 .idea/
 idea/*
+
+# Virtual Environment for MacOSX because I can't connect to Docker apparently.
+.venv/
 
 pycache/
 *.pyc

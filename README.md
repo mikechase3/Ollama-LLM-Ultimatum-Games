@@ -1,11 +1,54 @@
 # Ollama-LLM-Ultimatum-Games
 [//]: # (Better title: LLM Game Theory Sandbox? TODO: change project title.)
 
+## Architecture
+```
++--------------------------------------------------------------------------------+
+| HOST MACHINE (Your Computer - localhost)                                       |
+|                                                                                |
+|  +---------------------------+       +---------------------------------------+ |
+|  | src/main.py (Command Line)|       | src/dashboard.py (Streamlit UI)       | |
+|  | - Runs experiment script  |       | - Runs via 'streamlit run' command    | |
+|  +---------------------------+       +---------------------------------------+ |
+|               |                                         |                      |
+| (via docker exec)                                       |                      |
+|               |                                (Browser access)                |
+|               |              +----------------------------------------------+  |
+|               |              |                DOCKER NETWORK                |  |
+|               |              |                                              |  |
+|               |              |  +-----------------------------------------+ |  |
+|               |              |  | Python App Container (python-dev)       | |  |
+|               +------------->|  |              |                          | |  |
+|                              |  | +--------------+                        | |  |
+|                              |  | | src/engine.py|                        | |  |
+|                              |  | +--------------+                        | |  |
+|                              |  |       |                                 | |  |
+|                              |  | (API Call via http://ollama:11434)      | |  |
+|       localhost:8501 --------+--|----> | (Port 8501)                      | |  |
+|                              |  |       v                                 | |  |
+|                              |  +-------|---------------------------------+ |  |
+|                              |          |                                   |  |
+|                              |  +-------|---------------------------------+ |  |
+|                              |  | Ollama Service Container (ollama)       | |  |
+|       localhost:11434 -------+--|----->| API listens on Port 11434        | |  |
+|                              |  | ---- +----------------------------------+ |  |
+|                              |          ^                                   |  |
+|                              |  +-------|---------------------------------+ |  |
+|                              |  | OpenWebUI Container (webui)              | | |
+|       localhost:3000 --------+--|----->| UI on Port 8080                   | | |
+|                              |  |      | (Manual testing & model mgmt)     | | |
+|                              |  |      | (API Call via http://ollama:11434)| | |
+|                              |  +-----------------------------------------+ |  |
+|                              +----------------------------------------------+  |
+|                                                                                |
++--------------------------------------------------------------------------------+
+```
+
 ## Project Overview
 * Provide a self-contained Docker (Dockher... I hardly know her) env for conducting LLM behavioral experiments.
   * Ultimatum Game
   * With LLMs.
-* Must be easily run/transferrable to secure, air-gapped systems.
+* Must be easily run/transferable to secure, air-gapped systems.
 
 Researchers can define experimental trials in an Excel file, run them against locally hosted LLMs in Ollama
 and receive pd.DataFrame (or excel/csv) with the results for analysis.
