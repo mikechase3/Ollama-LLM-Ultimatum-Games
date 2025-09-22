@@ -70,7 +70,7 @@ A streamlit web app provides a friendly interface to visualize results & manage 
    1. Launch a browser & goto `http://localhost:8501`
    1. Verify streamlit dashboard loaded the `input_trials.xlsx` file.
    1. Click the "run experiment" button to start the process.
-1. Get the resultws
+1. Get the results
    1. Results will be displayed in browser/streamlit
    1. A new file named `data/exp##-results.xlsx` will be created in the project folder.
    1. Contains detailed output for each trial. 
