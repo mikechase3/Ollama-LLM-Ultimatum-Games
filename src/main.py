@@ -10,16 +10,20 @@ This script orchestrates the entire process:
 6. Save the results.
 """
 
+import pandas as pd
 from pathlib import Path
 from src import engine
+from src import input_table_gen
+
 
 # --- 1. Define Constants and File Paths ---
 # Use pathlib to handle paths robustly. This makes the script work
 # regardless of where you run it from.
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-INPUT_FILE_PATH = DATA_DIR / "input_trials.csv"
-OUTPUT_FILE_PATH = DATA_DIR / "output_trials.csv"
+INPUT_FILE_PATH = DATA_DIR / "Experiment-SAMPLE-IN.csv"
+OUTPUT_FILE_PATH = DATA_DIR / "Experiment-SAMPLE-OUT.csv"
+
 
 
 # --- 2. Main Pipeline Function ---
@@ -30,7 +34,7 @@ def main():
     # Step 1: Generate a sample input file if one doesn't exist
     if not INPUT_FILE_PATH.exists():
         print(f"Input file not found. Generating sample at '{INPUT_FILE_PATH}'")
-        engine.generate_sample_input_file(INPUT_FILE_PATH)
+        input_table_gen.generate_sample_input_file(INPUT_FILE_PATH)
 
     # Step 2: Load the input data
     print(f"\nLoading data from: {INPUT_FILE_PATH}")
