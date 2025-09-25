@@ -32,9 +32,12 @@ def main():
     print("--- Starting LLM Experiment Pipeline ---")
 
     # Step 1: Generate a sample input file if one doesn't exist
-    if not INPUT_FILE_PATH.exists():
-        print(f"Input file not found. Generating sample at '{INPUT_FILE_PATH}'")
-        input_table_gen.generate_sample_input_file(INPUT_FILE_PATH)
+    print(f"Input file not found. Generating sample at '{INPUT_FILE_PATH}'")
+    input_table_gen.generate_sample_input_file(INPUT_FILE_PATH)
+
+
+
+
 
     # Step 2: Load the input data
     print(f"\nLoading data from: {INPUT_FILE_PATH}")
