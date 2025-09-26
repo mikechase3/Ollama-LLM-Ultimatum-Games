@@ -9,8 +9,24 @@ def generate_sample_input_file(output_path: Path) -> None:
     """
     Generates a sample CSV file with experiment parameters and saves it to the specified path.
     """
+    base_system_prompt = ("You are a rational agent participating in an economic decision-making experiment. "
+                          "Provide clear, direct responses that explain your reasoning. "
+                          "Focus only on the decision at hand.")
+
+    base_prompt_proposer = ("You are the proposer in an ultimatum game. "
+                            "The total pot is ${pot}. "
+                            "You must propose a split of the pot between you and the receiver. "
+                            "State your offer to the receiver and justify your reasoning.")
+
+    base_prompt_receiver = ("You are the receiver in an ultimatum game. "
+                            "The total pot is ${pot}. "
+                            "The proposer has offered you ${offer}. "
+                            "If you accept, you will receive ${offer} and the proposer will receive ${pot - offer}. "
+                            "If you reject, both of you will receive nothing. "
+                            "Decide whether to accept or reject the offer and justify your reasoning.")
+
+
     num_rows = 20  # aka trials
-    # num_columns = 33
 
     # Define supported models
     models = ["phi3:mini", "phi3:latest", "mixtral:8x7b", "dolphin-llama3:8b"]
@@ -27,8 +43,9 @@ def generate_sample_input_file(output_path: Path) -> None:
         "model",             # str, model name
 
         # --- Prompts and Instructions ---
+        "system-prompt",     # str
         "base-prompt",       # str, researcher-provided or default
-        "modified-prompt",   # str, todo: edited version of base-prompt
+        "final-prompt",      # str, constructed prompt substitued with pot/offer.
 
         # --- Creative / Behavioral Parameters ---
         "temperature",       # float, [0.0-2.0], randomness/creativity
@@ -67,8 +84,9 @@ def generate_sample_input_file(output_path: Path) -> None:
         "offer": [50.0] * num_rows,
         "model": np.random.choice(models, size=num_rows),
 
-        "base-prompt": ["Placeholder for researcher-provided question."] * num_rows,
-        "modified-prompt": ["todo"] * num_rows,
+        "system-prompt": [base_system_prompt] * num_rows,
+        "base-prompt": [""] * num_rows,
+        "final-prompt": [""] * num_rows,
 
         "temperature": [0.8] * num_rows,
         "top_p": [0.9] * num_rows,
@@ -94,6 +112,11 @@ def generate_sample_input_file(output_path: Path) -> None:
         "num_keep": [0] * num_rows,
         "num_predict": [128] * num_rows,
     }, columns=columns)
+
+    # Assign base prompts based on role after DataFrame creation
+    table["base-prompt"] = table["role"].apply(
+        lambda x: base_prompt_proposer if x == "proposer" else base_prompt_receiver
+    )
 
     table.to_csv(output_path, index=False)
     print(f"Sample input file saved to: {output_path}")

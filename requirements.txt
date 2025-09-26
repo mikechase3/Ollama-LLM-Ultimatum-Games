@@ -1,4 +1,5 @@
-streamlit
-pandas
+streamlit~=1.50.0
+pandas~=2.3.2
 openpyxl
 ollama
+numpy~=2.3.3

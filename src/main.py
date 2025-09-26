@@ -10,33 +10,32 @@ This script orchestrates the entire process:
 6. Save the results.
 """
 
-import pandas as pd
+import subprocess
 from pathlib import Path
-from src import engine
-from src import input_table_gen
+import engine
+import input_table_gen
 
 
 # --- 1. Define Constants and File Paths ---
 # Use pathlib to handle paths robustly. This makes the script work
 # regardless of where you run it from.
+
+
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 INPUT_FILE_PATH = DATA_DIR / "Experiment-SAMPLE-IN.csv"
 OUTPUT_FILE_PATH = DATA_DIR / "Experiment-SAMPLE-OUT.csv"
 
 
-
 # --- 2. Main Pipeline Function ---
-def main():
+def run_pipeline():
     """Executes the full experiment pipeline."""
     print("--- Starting LLM Experiment Pipeline ---")
 
     # Step 1: Generate a sample input file if one doesn't exist
     print(f"Input file not found. Generating sample at '{INPUT_FILE_PATH}'")
     input_table_gen.generate_sample_input_file(INPUT_FILE_PATH)
-
-
-
 
 
     # Step 2: Load the input data
@@ -60,4 +59,4 @@ def main():
 
 # --- 3. Script Execution ---
 if __name__ == "__main__":
-    main()
+    run_pipeline()
