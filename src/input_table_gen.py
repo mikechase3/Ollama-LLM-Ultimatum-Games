@@ -1,8 +1,8 @@
 from pathlib import Path
+from typing import List
 
 import numpy as np
 import pandas as pd
-from typing import List
 
 
 def generate_sample_input_file(output_path: Path) -> None:
@@ -21,7 +21,7 @@ def generate_sample_input_file(output_path: Path) -> None:
     base_prompt_receiver = ("You are the receiver in an ultimatum game. "
                             "The total pot is ${pot}. "
                             "The proposer has offered you ${offer}. "
-                            "If you accept, you will receive ${offer} and the proposer will receive ${pot - offer}. "
+                            "If you accept, you will receive ${offer} and the proposer will receive ${remainder}. "
                             "If you reject, both of you will receive nothing. "
                             "Decide whether to accept or reject the offer and justify your reasoning.")
 
@@ -29,10 +29,10 @@ def generate_sample_input_file(output_path: Path) -> None:
     num_rows = 20  # aka trials
 
     # Define supported models
-    models = ["phi3:mini", "phi3:latest", "mixtral:8x7b", "dolphin-llama3:8b"]
+    models: List[str] = ["phi3:mini", "phi3:latest", "mixtral:8x7b", "dolphin-llama3:8b"]
 
     # Define DataFrame columns (matching OpenWebUI parameter names where possible)
-    columns = [
+    columns: List[str] = [
         # --- Experimental Setup Metadata ---
         "experiment-id",     # str, experiment grouping
         "trial-id",          # str, unique trial identifier
@@ -43,7 +43,7 @@ def generate_sample_input_file(output_path: Path) -> None:
         "model",             # str, model name
 
         # --- Prompts and Instructions ---
-        "system-prompt",     # str
+        "system-prompt",     # str, researcher-provided or default
         "base-prompt",       # str, researcher-provided or default
         "final-prompt",      # str, constructed prompt substitued with pot/offer.
 
@@ -75,7 +75,7 @@ def generate_sample_input_file(output_path: Path) -> None:
     ]
 
     # Fill with defaults / placeholders
-    table = pd.DataFrame({
+    table: pd.DataFrame = pd.DataFrame({
         "experiment-id": ["EXP00"] * num_rows,
         "trial-id": [f"trial_{i+1}" for i in range(num_rows)],
         "game": ["ultimatum"] * num_rows,

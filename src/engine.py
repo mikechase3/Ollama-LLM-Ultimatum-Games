@@ -25,11 +25,17 @@ def load_input_data(input_path: Path) -> pd.DataFrame:
     Returns:
         pd.DataFrame: A DataFrame containing the experimental trials.
     """
-    # This will contain logic to read the CSV/Excel and validate it.
-    print(f"Placeholder: Will load data from '{input_path}'")
-    # Return an empty DataFrame for now to allow the pipeline to run.
-    return pd.DataFrame()
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_path}")
 
+    df = pd.read_csv(input_path)
+
+    # Validate required columns
+    required_cols = ['role', 'pot', 'offer', 'base-prompt']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Missing required columns: {missing_cols}")
+    return df
 # --- 3. Prompt Engineering ---
 
 def build_prompts_df(input_df: pd.DataFrame) -> pd.DataFrame:
@@ -43,10 +49,24 @@ def build_prompts_df(input_df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The DataFrame with an added 'final_prompt' column.
     """
-    # This will contain the logic for the PromptBuilder class we discussed.
-    print("Placeholder: Will build final prompts for each trial.")
-    input_df['final_prompt'] = "This is a placeholder prompt."
-    return input_df
+    df = input_df.copy()
+
+    def format_prompt(row):
+        if row['role'] == 'proposer':
+            return row['base-prompt'].format(pot=row['pot'])
+        elif row['role'] == 'receiver':
+            remainder = row['pot'] - row['offer']  # Calculate outside format()
+            return row['base-prompt'].format(
+                pot=row['pot'],
+                offer=row['offer'],
+                remainder=remainder  # Pass as new parameter
+            )
+        else:
+            raise ValueError(f"Invalid role: {row['role']}")
+
+    df['final-prompt'] = df.apply(format_prompt, axis=1)  # axis 1 for row-wise operations.
+
+    return df
 
 # --- 4. Experiment Execution ---
 
