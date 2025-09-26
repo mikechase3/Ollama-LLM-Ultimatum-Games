@@ -9,6 +9,8 @@ def generate_sample_input_file(output_path: Path) -> None:
     """
     Generates a sample CSV file with experiment parameters and saves it to the specified path.
     """
+    num_rows = 30  # aka trials
+
     base_system_prompt = ("You are a rational agent participating in an economic decision-making experiment. "
                           "Provide clear, direct responses that explain your reasoning. "
                           "Focus only on the decision at hand.")
@@ -26,10 +28,27 @@ def generate_sample_input_file(output_path: Path) -> None:
                             "Decide whether to accept or reject the offer and justify your reasoning.")
 
 
-    num_rows = 20  # aka trials
 
     # Define supported models
-    models: List[str] = ["phi3:mini", "phi3:latest", "mixtral:8x7b", "dolphin-llama3:8b"]
+    cpu_models: List[str] = [
+        "phi:latest",        # Microsoft's smallest model
+        "phi-2:latest",      # Improved version, still lightweight
+        "neural-chat:7b",    # Good balance of size/performance
+        "stablelm-zephyr:3b",# Very lightweight
+        "llama2:7b",         # Base model, reasonable on CPU
+        "orca-mini:3b"       # Smaller version of Orca
+    ]
+    gpu_models: List[str] = [
+        "mixtral:8x7b",      # State-of-the-art performance
+        "llama2:70b",        # Large, well-researched model
+        "falcon:40b",        # Strong performer
+        "openchat:7b",       # Great for dialogues
+        "vicuna:13b",        # Strong reasoning
+        "codellama:34b",     # Excellent for analytical tasks
+        "qwen:72b",          # Latest large model
+        "claude-2:latest"    # If available through Ollama
+    ]
+    models: List[str] = [] + cpu_models  # + gpu_models
 
     # Define DataFrame columns (matching OpenWebUI parameter names where possible)
     columns: List[str] = [
@@ -47,7 +66,7 @@ def generate_sample_input_file(output_path: Path) -> None:
         "base-prompt",       # str, researcher-provided or default
         "final-prompt",      # str, constructed prompt substitued with pot/offer.
 
-        # --- Creative / Behavioral Parameters ---
+        # --- Creative / Behavioral Parameters for Ollama ---
         "temperature",       # float, [0.0-2.0], randomness/creativity
         "top_p",             # float, [0.0-1.0], nucleus sampling
         "top_k",             # int, [1+], top-k token filtering
@@ -64,14 +83,14 @@ def generate_sample_input_file(output_path: Path) -> None:
         "seed",              # int, reproducibility seed (or not-applicable)
         "repeat_last_n",     # int, tokens considered for repeat_penalty
         "reasoning_effort",  # float or str, not widely supported
-        "logit_bias",        # str or dict, bias token probabilities
+        "logit_bias",        # str or dict, bias token probabilities.
         "num_ctx",           # int, context window size
-        "max_tokens",        # int, max tokens to generate
         "stop_sequence",     # str or list, stopping condition
-        "use_mmap",          # bool, memory map flag
-        "use_mlock",         # bool, lock model into RAM
-        "num_keep",          # int, tokens to keep from start of context
+        "use_mmap",          # bool, memory map flag, not useful
+        "use_mlock",         # bool, lock model into RAM, not useful
+        "num_keep",          # int, tokens to keep from start of context, not useful
         "num_predict",       # int, number of tokens to predict
+        # "max_tokens",        # int, max tokens to generate - overlaps w/ num_predict.
     ]
 
     # Fill with defaults / placeholders
@@ -105,12 +124,12 @@ def generate_sample_input_file(output_path: Path) -> None:
         "reasoning_effort": [""] * num_rows,  # left blank
         "logit_bias": [""] * num_rows,        # left blank
         "num_ctx": [2048] * num_rows,
-        "max_tokens": [512] * num_rows,
         "stop_sequence": [""] * num_rows,     # left blank
         "use_mmap": [True] * num_rows,
         "use_mlock": [False] * num_rows,
         "num_keep": [0] * num_rows,
-        "num_predict": [128] * num_rows,
+        "num_predict": [512] * num_rows,
+        # "max_tokens": [512] * num_rows,
     }, columns=columns)
 
     # Assign base prompts based on role after DataFrame creation
