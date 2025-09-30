@@ -31,12 +31,13 @@ def generate_sample_input_file(output_path: Path) -> None:
 
     # Define supported models
     cpu_models: List[str] = [
-        "phi:latest",        # Microsoft's smallest model
-        "phi-2:latest",      # Improved version, still lightweight
-        "neural-chat:7b",    # Good balance of size/performance
-        "stablelm-zephyr:3b",# Very lightweight
-        "llama2:7b",         # Base model, reasonable on CPU
-        "orca-mini:3b"       # Smaller version of Orca
+        "phi3:latest",
+        # "phi:latest",        # Microsoft's smallest model
+        # "phi-2:latest",      # Improved version, still lightweight
+        # "neural-chat:7b",    # Good balance of size/performance
+        # "stablelm-zephyr:3b",# Very lightweight
+        # "llama2:7b",         # Base model, reasonable on CPU
+        # "orca-mini:3b"       # Smaller version of Orca
     ]
     gpu_models: List[str] = [
         "mixtral:8x7b",      # State-of-the-art performance
