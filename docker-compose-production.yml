@@ -4,19 +4,28 @@ services:
     image: ollama/ollama
     container_name: ollama
     volumes:
-      # Maps local folder `ollama-data` to the container's model storage. All models saved here.
       - ./ollama-data:/root/.ollama
     ports:
       - "11434:11434"
     restart: unless-stopped
+    # PRODUCTION CONFIGURATION: Pulls ALL models listed in input_table_gen.py
+    # Warning: This is roughly 100GB+ of downloads.
     command: >
       sh -c "
         ollama serve & 
         sleep 5 && 
         ollama pull phi3:latest &&
+        ollama pull dolphin-llama3:8b &&
+        ollama pull mixtral:8x7b &&
+        ollama pull llama2:70b &&
+        ollama pull falcon:40b &&
+        ollama pull openchat:7b &&
+        ollama pull vicuna:13b &&
+        ollama pull codellama:34b &&
+        ollama pull qwen:72b &&
         wait
       "
-  # Service 2: The Open-Webui Client for testing/interfaces
+
   webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
@@ -37,11 +46,9 @@ services:
     volumes:
       - ./:/app
     ports:
-      - "8501:8501"  # Map Streamlit App
-      - "2222:22"    # Map host port 2222 to container's SSH port on 22
+      - "8501:8501"
+      - "2222:22"
     command: sh -c "service ssh start && streamlit run src/dashboard.py"
-#    command: streamlit run src/dashboard.py --server.runOnSave=true
-#    command: sleep infinity
     depends_on:
       - ollama
     restart: unless-stopped

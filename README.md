@@ -63,9 +63,10 @@ A streamlit web app provides a friendly interface to visualize results & manage 
 
 ### Running The Experiment
 1. Prepare the input file
-   1. Open the `data/input_trials.xlsx` file
-   2. Edit the rows to define experimental conditions (e.g. change pot, split, model, temperature)
-   3. Save the file.
+   1. Generate the `data/input_trials.xlsx` file by running `python src/main.py`
+   2. Open the `data/input_trials.xlsx` file
+   3. Edit the rows to define experimental conditions (e.g. change pot, split, model, temperature)
+   4. Save the file.
 1. Launch the env
    1. Open a terminal in the project's root directory
    2. Run `docker compose up -d`
