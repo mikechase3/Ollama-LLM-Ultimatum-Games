@@ -9,7 +9,7 @@ def generate_sample_input_file(output_path: Path) -> None:
     """
     Generates a sample CSV file with experiment parameters and saves it to the specified path.
     """
-    num_rows = 30  # aka trials
+    num_rows = 10  # aka trials
 
     base_system_prompt = ("You are a rational agent participating in an economic decision-making experiment. "
                           "Provide clear, direct responses that explain your reasoning. "

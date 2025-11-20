@@ -1,0 +1,38 @@
+services:
+  # Service #1: The Ollama LLM Server
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    volumes:
+      - ./ollama-data:/root/.ollama
+    ports:
+      # This exposes the API to your LOCAL machine.
+      # Your local Python scripts will hit http://localhost:11434
+      - "11434:11434"
+    restart: unless-stopped
+    # Standard Dev Config: Only pulls phi3
+    command: >
+      sh -c "
+        ollama serve & 
+        sleep 5 && 
+        ollama pull phi3:latest &&
+        wait
+      "
+
+  # Service #2: The Web Interface (Management)
+  webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    volumes:
+      - ./webui-data:/app/backend/data
+    ports:
+      - "3000:8080"
+    environment:
+      # This container is INSIDE the network, so it still needs the internal hostname
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  # Python Service REMOVED.
+  # Run locally via: streamlit run src/dashboard.py

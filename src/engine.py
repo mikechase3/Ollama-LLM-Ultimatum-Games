@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 from typing import List, Dict, Any
 import ollama
+import warnings
 
 
 # --- 1. Data Generation ---> moved to input_table_gen.py ---
@@ -69,7 +70,8 @@ def build_prompts_df(input_df: pd.DataFrame) -> pd.DataFrame:
             raise ValueError(f"Invalid role: {row['role']}")
 
     df['final-prompt'] = df.apply(format_prompt, axis=1)  # axis 1 for row-wise operations.
-
+    print("Debugging the engine.py.build_prompts_df() to see if final prompts got generated")
+    print(df.head())
     return df
 
 
@@ -88,14 +90,20 @@ def run_ollama_trials(trials_with_prompts_df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: A new DataFrame containing the results of all trials,
                       including all inputs and all output metadata.
     """
+
+
+
+
     # This is the core engine that will call the Ollama API.
-    print("Placeholder: Will run all trials against the Ollama API.")
+    warnings.warn("run_ollama_trials is not yet implemented.", UserWarning)
+
+
     # Return an empty DataFrame for now.
     return pd.DataFrame()
 
 
 def debug_run_single_trial(trial: Dict[str, Any]) -> Dict[str, Any]:
-    ''' Runs a single trial for debugging purposes'''
+    """ Runs a single trial for debugging purposes"""
     # Define the parameters
     params = {
         "model": "phi:latest",
