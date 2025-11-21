@@ -10,14 +10,51 @@ services:
       # Your local Python scripts will hit http://localhost:11434
       - "11434:11434"
     restart: unless-stopped
-    # Standard Dev Config: Only pulls phi3
+    # Simple healthcheck: use the ollama CLI to verify the daemon is responding
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    # The ollama image already has entrypoint "/bin/ollama" which defaults to
+    # running the server. Do NOT prefix with "ollama" here, otherwise it becomes
+    # "/bin/ollama ollama serve" and the container will crash with:
+    #   Error: unknown command "ollama" for "ollama"
+    # If you want to be explicit, you can set `command: ["serve"]`.
+    # Leaving it out uses the image default.
+
+  # Optional one-shot helper: automatically pull models once the server is healthy
+  model-puller:
+    image: ollama/ollama
+    container_name: ollama-model-puller
+    environment:
+      # Tell the CLI inside this helper container to talk to the ollama service
+      - OLLAMA_HOST=http://ollama:11434
+      # Space-separated list of models to pull on startup (override with env file or CLI)
+      # Example: OLLAMA_MODELS="phi3:latest llama3.2:3b-instruct qwen2.5:3b"
+      - OLLAMA_MODELS=${OLLAMA_MODELS:-phi3:latest}
+    volumes:
+      - ./ollama-data:/root/.ollama
+    depends_on:
+      ollama:
+        condition: service_healthy
+    # Run once and exit after pulling; do not restart
+    restart: "no"
+    entrypoint: ["/bin/sh", "-lc"]
+    # Pull each model with retry until success
     command: >
-      sh -c "
-        ollama serve & 
-        sleep 5 && 
-        ollama pull phi3:latest &&
-        wait
-      "
+      set -e;
+      echo "Models to pull: $OLLAMA_MODELS";
+      for m in $OLLAMA_MODELS; do
+        echo "Pulling $m ...";
+        until /bin/ollama pull "$m"; do
+          echo "Failed to pull $m. Retrying in 5s...";
+          sleep 5;
+        done;
+      done;
+      echo "All models pulled. Exiting.";
 
   # Service #2: The Web Interface (Management)
   webui:

@@ -148,7 +148,7 @@ def debug_run_single_trial(trial: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     # Generate with Ollama
-    response = ollama.chat(**params)
+    response = ollama.generate(**params)  # modified from chat -> generate
 
     # Show the full results dict
     print(response)

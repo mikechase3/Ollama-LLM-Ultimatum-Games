@@ -91,6 +91,13 @@ This starts only the infrastructure services (e.g., Ollama and OpenWebUI) via Do
 Notes
 - The development run configuration generates tables using a single model at a time. Since the current development target is a CPU-only machine, there’s no need to spin up multiple models concurrently. This keeps iteration fast and resource usage low.
 
+##### Pycharm Configs
+With the virtual environment activated, you can run the app directly from PyCharm w/ configs.
+
+Setup pycharm configs like this:
+![RunMain](PycharmMainConfig.png)
+![RunShell-ServeStreamlit](StreamlitShellConfig.png)
+
 #### Option B: All-in-Docker (containerized app + infra)
 If you prefer running the entire stack in containers:
 
@@ -111,6 +118,34 @@ If you prefer running the entire stack in containers:
 - `docker-compose.yml`: default dev stack (containers for app and infra together).
 - `docker-compose-production.yml`: production-leaning configuration with tighter settings.
 
+### Automatic model pull with Docker Compose
+To avoid the "model not found" error the first time you run the app, the infra compose file includes a one-shot helper service that will pull one or more Ollama models as soon as the Ollama server is healthy.
+
+What’s included
+- A healthcheck on the `ollama` service to ensure it’s ready.
+- A `model-puller` service that:
+  - waits for `ollama` to become healthy,
+  - connects to it using `OLLAMA_HOST=http://ollama:11434`,
+  - pulls the models listed in the `OLLAMA_MODELS` environment variable,
+  - exits successfully (it does not keep running).
+
+How to use
+1. Choose which models to pre-pull. Example options:
+   - `phi3:latest` (Microsoft Phi-3)
+   - `llama3.2:3b-instruct`
+   - `qwen2.5:3b`
+2. Start the infra and specify models (space-separated):
+   - `OLLAMA_MODELS="phi3:latest" docker compose -f docker-compose-infra.yml up -d`
+   - or multiple: `OLLAMA_MODELS="phi3:latest llama3.2:3b-instruct" docker compose -f docker-compose-infra.yml up -d`
+3. Verify the pull finished:
+   - `docker logs ollama-model-puller` should end with `All models pulled. Exiting.`
+   - `curl http://localhost:11434/api/tags` should list the pulled models.
+
+Notes and troubleshooting
+- Model name matters. If you see `model 'phi:latest' not found`, update to a valid tag such as `phi3:latest`. You can find model names at https://ollama.com/library or via `open-webui`.
+- You can still pull manually any time: `docker exec -it ollama ollama pull <model:tag>`.
+- The models are stored in the mounted volume `./ollama-data`, so they persist across restarts.
+
 ### Why native dev instead of Docker for the app?
 During development, PyCharm had issues talking to the newest Docker Engine API. After trying a `daemon.json` tweak, PyCharm still couldn’t reliably connect/build and use the container as the interpreter. So, for now: f*** it, we’re doing it live — the app runs natively in a `.venv`, while Docker only runs the infra.
 
@@ -124,3 +159,4 @@ Air‑gapped tip: On an online machine, pre-download packages for offline instal
 ```
 pip download -r requirements.txt -d ./packages
 ```
+

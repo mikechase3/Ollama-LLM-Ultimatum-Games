@@ -48,8 +48,8 @@ def run_pipeline():
 
     # Step 4: Run the trials against the Ollama API
     print("\nRunning Ollama trials...")
-    # results_df = engine.run_ollama_trials(trials_with_prompts_df)
-    print(engine.debug_run_single_trial(trials_with_prompts_df.iloc[0]))  # Debug output for first trial
+    results_df = engine.run_ollama_trials(trials_with_prompts_df)
+    # print(engine.debug_run_single_trial(trials_with_prompts_df.iloc[0]))  # Debug output for first trial
 
     # Step 5: Save the final results
     print(f"\nSaving results to: {OUTPUT_FILE_PATH}")
