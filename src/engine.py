@@ -92,16 +92,105 @@ def run_ollama_trials(trials_with_prompts_df: pd.DataFrame) -> pd.DataFrame:
     """
 
 
+    # Helper: build Ollama options safely from a data row
+    def _build_options(row: Dict[str, Any]) -> Dict[str, Any]:
+        # Map known columns to Ollama options; include only if present and not null
+        def present(key: str) -> bool:
+            return (key in row) and (row[key] is not None) and (not (isinstance(row[key], float) and np.isnan(row[key]))) and (row[key] != "")
 
+        opts: Dict[str, Any] = {}
+        mapping = [
+            ("seed", "seed"),
+            ("temperature", "temperature"),
+            ("top_p", "top_p"),
+            ("top_k", "top_k"),
+            ("repeat_penalty", "repeat_penalty"),
+            ("presence_penalty", "presence_penalty"),
+            ("frequency_penalty", "frequency_penalty"),
+            ("mirostat", "mirostat"),
+            ("mirostat_tau", "mirostat_tau"),
+            ("mirostat_eta", "mirostat_eta"),
+            ("num_ctx", "num_ctx"),
+            ("num_predict", "num_predict"),
+            ("num_keep", "num_keep"),
+            ("tfs_z", "tfs_z"),
+            ("min_p", "min_p"),
+            ("repeat_last_n", "repeat_last_n"),
+        ]
+        for col, opt_key in mapping:
+            if present(col):
+                opts[opt_key] = row[col]
 
+        # Stop sequences: support string or list
+        if present("stop_sequence"):
+            stop_val = row["stop_sequence"]
+            if isinstance(stop_val, str):
+                # Allow pipe-separated list, else single stop
+                parts = [s for s in [p.strip() for p in stop_val.split("|")] if s]
+                opts["stop"] = parts if len(parts) > 1 else parts
+            elif isinstance(stop_val, (list, tuple)):
+                opts["stop"] = list(stop_val)
 
+        # Booleans that Ollama accepts
+        for b in ["use_mmap", "use_mlock"]:
+            if present(b):
+                opts[b] = bool(row[b])
 
-    # This is the core engine that will call the Ollama API.
-    warnings.warn("run_ollama_trials is not yet implemented.", UserWarning)
+        return opts
 
+    # Iterate over trials and call Ollama
+    results: List[Dict[str, Any]] = []
+    trials: List[Dict[str, Any]] = trials_with_prompts_df.to_dict(orient="records")
 
-    # Return an empty DataFrame for now.
-    return pd.DataFrame()
+    for idx, row in enumerate(trials, start=1):
+        base_out: Dict[str, Any] = dict(row)  # start with original inputs
+        try:
+            model = row.get("model")
+            prompt = row.get("final-prompt")
+            system_prompt = row.get("system-prompt", "")
+            options = _build_options(row)
+
+            if not model or not prompt:
+                raise ValueError("Missing required fields for Ollama call: 'model' and/or 'final-prompt'.")
+
+            response = ollama.generate(
+                model=model,
+                prompt=prompt,
+                system=system_prompt or None,
+                options=options if options else None,
+                stream=False,
+            )
+
+            # Merge key response fields
+            base_out.update({
+                "llm_status": "ok",
+                "llm_model": response.get("model"),
+                "llm_created_at": response.get("created_at"),
+                "llm_response": response.get("response"),
+                "llm_done": response.get("done"),
+                "llm_done_reason": response.get("done_reason"),
+                "llm_eval_count": response.get("eval_count"),
+                "llm_eval_duration_ns": response.get("eval_duration"),
+                "llm_prompt_eval_count": response.get("prompt_eval_count"),
+                "llm_prompt_eval_duration_ns": response.get("prompt_eval_duration"),
+                "llm_total_duration_ns": response.get("total_duration"),
+            })
+
+            # Some versions include token/metadata under "info"; if present, flatten a few
+            info = response.get("info") if isinstance(response, dict) else None
+            if isinstance(info, dict):
+                for k, v in info.items():
+                    base_out[f"llm_info_{k}"] = v
+
+        except Exception as e:
+            base_out.update({
+                "llm_status": "error",
+                "llm_error": str(e),
+            })
+
+        results.append(base_out)
+
+    return pd.DataFrame(results)
 
 
 def debug_run_single_trial(trial: Dict[str, Any]) -> Dict[str, Any]:
@@ -167,9 +256,11 @@ def save_results(results_df: pd.DataFrame, output_path: Path) -> None:
         results_df (pd.DataFrame): The DataFrame containing the experiment results.
         output_path (Path): The file path where the results should be saved.
     """
-    # This will contain the logic to save the results.
-    print(f"Placeholder: Will save results to '{output_path}'")
-    pass
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if results_df is None or results_df.empty:
+        warnings.warn("save_results called with empty results DataFrame; creating empty file.")
+    results_df.to_csv(output_path, index=False)
+    print(f"Results saved to: {output_path}")
 
 
 # --- Utility: Optional preview and save of intermediary DataFrame (Step 3) ---
