@@ -64,7 +64,7 @@ def build_prompts_df(input_df: pd.DataFrame) -> pd.DataFrame:
             return row['base-prompt'].format(
                 pot=row['pot'],
                 offer=row['offer'],
-                remainder=remainder  # Pass as new parameter
+                remainder=remainder  # Pass as a new parameter
             )
         else:
             raise ValueError(f"Invalid role: {row['role']}")

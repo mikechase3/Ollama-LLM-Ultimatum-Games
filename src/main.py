@@ -45,6 +45,7 @@ def run_pipeline():
     # Step 3: Build prompts for each trial
     print("\nBuilding prompts...")
     trials_with_prompts_df = engine.build_prompts_df(input_df)
+    wait = input("press any key to continue to run ollama trials against the API\n")
 
     # Step 4: Run the trials against the Ollama API
     print("\nRunning Ollama trials...")
