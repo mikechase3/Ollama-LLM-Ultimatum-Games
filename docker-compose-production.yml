@@ -8,23 +8,30 @@ services:
     ports:
       - "11434:11434"
     restart: unless-stopped
-    # PRODUCTION CONFIGURATION: Pulls ALL models listed in input_table_gen.py
-    # Warning: This is roughly 100GB+ of downloads.
+
+    # --- GPU CONFIGURATION START ---
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # --- GPU CONFIGURATION END ---
+
+    # Use this exact structure for the entrypoint and command:
+    entrypoint: ["/bin/sh", "-c"]
+
     command: >
-      sh -c "
-        ollama serve & 
-        sleep 5 && 
-        ollama pull phi3:latest &&
-        ollama pull dolphin-llama3:8b &&
-        ollama pull mixtral:8x7b &&
-        ollama pull llama2:70b &&
-        ollama pull falcon:40b &&
-        ollama pull openchat:7b &&
-        ollama pull vicuna:13b &&
-        ollama pull codellama:34b &&
-        ollama pull qwen:72b &&
-        wait
-      "
+      "ollama serve & 
+      sleep 5 && 
+      ollama pull phi3:latest &&
+      ollama pull dolphin-llama3:8b &&
+      ollama pull openchat:7b &&
+      ollama pull mistral:7b &&
+      ollama pull gemma2:9b &&
+      ollama pull hermes3:8b &&
+      wait"
 
   webui:
     image: ghcr.io/open-webui/open-webui:main

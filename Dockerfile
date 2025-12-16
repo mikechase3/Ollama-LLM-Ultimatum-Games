@@ -48,3 +48,4 @@ COPY . .
 # Expose ports for Streamlit and SSH
 EXPOSE 8501
 EXPOSE 22
+

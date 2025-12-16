@@ -1,6 +1,9 @@
 # Ollama-LLM-Ultimatum-Games
 [//]: # (Better title: LLM Game Theory Sandbox? TODO: change project title.)
 
+## OpenWebUI Login
+me@mchase.me / `password`
+
 ## Architecture
 ```
 +--------------------------------------------------------------------------------+
