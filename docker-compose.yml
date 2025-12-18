@@ -30,10 +30,10 @@ services:
       - ollama
     restart: unless-stopped
 
-  # Service 3: Python Experiment Runner
-  python-dev:
+  # Service 3: Streamlit Dashboard
+  dashboard:
     build: .
-    container_name: python-dev
+    container_name: dashboard
     volumes:
       - ./:/app
     ports:
